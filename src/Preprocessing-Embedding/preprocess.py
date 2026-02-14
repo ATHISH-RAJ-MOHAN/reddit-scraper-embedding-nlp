@@ -62,7 +62,7 @@ def process_json(json_path, output_csv):
     for post in tqdm(data, desc="Cleaning posts"):
         title = clean_text(post.get("title", ""))
         body = clean_text(post.get("body", ""))
-        comments = clean_text(" ".join(post.get("comments", []))) if "comments" in post else ""
+        comments = clean_text(post.get("top_comment", ""))
 
         full_text = f"{title} {body} {comments}".strip()
 
@@ -78,7 +78,7 @@ def process_json(json_path, output_csv):
             "subreddit": os.path.basename(json_path).replace(".json", ""),
             "title_clean": title,
             "body_clean": body,
-            "comments_clean": comments,
+            "comments": comments,
             "full_text": full_text,
             "date": date,
             "time": time,
@@ -95,13 +95,14 @@ def process_json(json_path, output_csv):
 # Main
 if __name__ == "__main__":
     json_files = [
-        "../data/parsed_json/AskCulinary.json",
-        "../data/parsed_json/Baking.json",
-        "../data/parsed_json/Cooking.json",
-        "../data/parsed_json/FoodScience.json",
-        "../data/parsed_json/Recipes.json"
+        "../../data/parsed_json/AskCulinary.json",
+        "../../data/parsed_json/Baking.json",
+        "../../data/parsed_json/Cooking.json",
+        "../../data/parsed_json/FoodScience.json",
+        "../../data/parsed_json/Recipes.json"
     ]
 
     for jf in json_files:
-        output = os.path.join("../data/cleaned_csv", os.path.basename(jf).replace(".json", "_cleaned.csv"))
+        output = os.path.join("../../data/cleaned_csv", os.path.basename(jf).replace(".json", "_cleaned.csv"))
+        os.makedirs(os.path.dirname(output), exist_ok=True)
         process_json(jf, output)

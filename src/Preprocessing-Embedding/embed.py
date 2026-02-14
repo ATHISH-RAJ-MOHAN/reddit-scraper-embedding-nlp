@@ -5,9 +5,9 @@ from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 
 # Paths
-CLEANED_DIR = "../data/cleaned_csv"
-OUTPUT_EMB = "../data/embeddings.npy"
-OUTPUT_META = "../data/embedding_data/embeddings.csv"
+CLEANED_DIR = "../../data/cleaned_csv"
+OUTPUT_EMB = "../../data/embeddings.npy"
+OUTPUT_META = "../../data/embedding_data/embeddings.csv"
 
 #TEST for 10 data points
 TEST_MODE = False
