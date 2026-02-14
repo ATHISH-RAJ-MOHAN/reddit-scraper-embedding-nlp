@@ -16,7 +16,7 @@ pip install -r requirements.txt
 ```bash
 cd src/Preprocessing-Embedding
 python preprocessing_pipeline.py
-```
+
 
 ## Run the full pipeline:
 project_root/
@@ -48,6 +48,6 @@ data/cleaned_csv/
 ├── Cooking_cleaned.csv
 ├── FoodScience_cleaned.csv
 └── Recipes_cleaned.csv
-
+```
 ## Final Dataset:
 data/cooking_data/cooking.csv
