@@ -1,4 +1,3 @@
-# OM SRI GANESHAYA NAMAHA
 import subprocess
 import os
 import sys
