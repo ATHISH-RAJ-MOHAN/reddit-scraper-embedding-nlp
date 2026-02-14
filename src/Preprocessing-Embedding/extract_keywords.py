@@ -1,4 +1,3 @@
-# OM SRI GANESHAYA NAMAHA
 import pandas as pd
 import os
 import json
