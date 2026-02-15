@@ -51,3 +51,41 @@ data/cleaned_csv/
 ```
 ## Final Dataset:
 data/cooking_data/cooking.csv
+
+---
+## Added: Clustering + Automation
+
+**Scraper updates**
+- Added CLI arguments `--subreddits` and `--limit`.
+- Captures `top_comment` from each post detail page when available.
+
+Example:
+```bash
+python src/scraper/scrape_reddit.py --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes --limit 100
+```
+
+**Preprocessing updates**
+- Merges `top_comment` and any `comments` list into a single cleaned field.
+- Auto‑discovers all JSON files in `data/parsed_json/`.
+- Writes `comments_clean` alongside `full_text`.
+
+**Embedding updates**
+- Auto‑discovers all cleaned CSVs in `data/cleaned_csv/`.
+- Ensures embedding output directories exist.
+
+**Clustering**
+```bash
+python src/analysis/cluster_messages.py --k 8
+```
+Outputs:
+- `data/clustered/clustered_messages.csv`
+- `data/clustered/cluster_summary.json`
+- `data/clustered/cluster_plot.png`
+
+**Automation**
+```bash
+python src/automation/run_pipeline.py 5 --limit 100 --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes --k 8
+```
+
+**Notes**
+- The first preprocessing run will download NLTK resources (`stopwords`, `wordnet`).

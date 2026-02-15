@@ -1,11 +1,12 @@
+import argparse
 import json
 import os
 import time
 from bs4 import BeautifulSoup
 from scraper.fetch_html import fetch_html
-from scraper.parse_posts import parse_reddit_html, parse_single_post
+from scraper.parse_posts import parse_reddit_html, parse_single_post, parse_top_comment
 
-SUBREDDITS = ["Cooking"]
+DEFAULT_SUBREDDITS = ["Cooking"]
 
 def scrape_subreddit(subreddit, limit=10):
     base_url = f"https://old.reddit.com/r/{subreddit}/?limit=100"
@@ -52,6 +53,7 @@ def scrape_subreddit(subreddit, limit=10):
             if detail_html:
                 full_body = parse_single_post(detail_html)
                 post['body'] = full_body
+                post['top_comment'] = parse_top_comment(detail_html)
             else:
                 print("  Failed to load detail page.")
         else:
@@ -59,12 +61,15 @@ def scrape_subreddit(subreddit, limit=10):
 
     return all_posts
 
-def scrape_all():
+def scrape_all(subreddits=None, limit=100):
     os.makedirs("data/parsed_json", exist_ok=True)
     final_data = {}
 
-    for sub in SUBREDDITS:
-        posts = scrape_subreddit(sub, limit=100) # Set to 10 for testing speed
+    if subreddits is None:
+        subreddits = DEFAULT_SUBREDDITS
+
+    for sub in subreddits:
+        posts = scrape_subreddit(sub, limit=limit) # Set to 10 for testing speed
         final_data[sub] = posts
 
         with open(f"data/parsed_json/{sub}.json", "w", encoding="utf-8") as f:
@@ -72,3 +77,24 @@ def scrape_all():
 
     print("\nScraping complete.")
     return final_data
+
+def _parse_args():
+    parser = argparse.ArgumentParser(description="Scrape Reddit posts and save as JSON.")
+    parser.add_argument(
+        "--subreddits",
+        type=str,
+        default=",".join(DEFAULT_SUBREDDITS),
+        help="Comma-separated list of subreddits to scrape.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=100,
+        help="Number of posts to fetch per subreddit.",
+    )
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    args = _parse_args()
+    subs = [s.strip() for s in args.subreddits.split(",") if s.strip()]
+    scrape_all(subreddits=subs, limit=args.limit)

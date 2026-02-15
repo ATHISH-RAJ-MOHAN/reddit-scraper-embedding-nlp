@@ -6,3 +6,7 @@ scikit-learn
 sentence-transformers
 torch
 transformers
+matplotlib
+requests
+beautifulsoup4
+lxml

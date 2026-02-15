@@ -62,7 +62,12 @@ def process_json(json_path, output_csv):
     for post in tqdm(data, desc="Cleaning posts"):
         title = clean_text(post.get("title", ""))
         body = clean_text(post.get("body", ""))
-        comments = clean_text(post.get("top_comment", ""))
+        comment_chunks = []
+        if "comments" in post:
+            comment_chunks.append(" ".join(post.get("comments", [])))
+        if "top_comment" in post:
+            comment_chunks.append(post.get("top_comment", ""))
+        comments = clean_text(" ".join(comment_chunks)) if comment_chunks else ""
 
         full_text = f"{title} {body} {comments}".strip()
 
@@ -79,6 +84,7 @@ def process_json(json_path, output_csv):
             "title_clean": title,
             "body_clean": body,
             "comments": comments,
+            "comments_clean": comments,
             "full_text": full_text,
             "date": date,
             "time": time,
@@ -94,15 +100,23 @@ def process_json(json_path, output_csv):
 
 # Main
 if __name__ == "__main__":
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    parsed_dir = os.path.join(base_dir, "../../data/parsed_json")
+    cleaned_dir = os.path.join(base_dir, "../../data/cleaned_csv")
+    os.makedirs(cleaned_dir, exist_ok=True)
+
     json_files = [
-        "../../data/parsed_json/AskCulinary.json",
-        "../../data/parsed_json/Baking.json",
-        "../../data/parsed_json/Cooking.json",
-        "../../data/parsed_json/FoodScience.json",
-        "../../data/parsed_json/Recipes.json"
+        os.path.join(parsed_dir, f)
+        for f in os.listdir(parsed_dir)
+        if f.endswith(".json")
     ]
 
-    for jf in json_files:
-        output = os.path.join("../../data/cleaned_csv", os.path.basename(jf).replace(".json", "_cleaned.csv"))
-        os.makedirs(os.path.dirname(output), exist_ok=True)
-        process_json(jf, output)
+    if not json_files:
+        print(f"No JSON files found in {parsed_dir}")
+    else:
+        for jf in sorted(json_files):
+            output = os.path.join(
+                cleaned_dir,
+                os.path.basename(jf).replace(".json", "_cleaned.csv"),
+            )
+            process_json(jf, output)

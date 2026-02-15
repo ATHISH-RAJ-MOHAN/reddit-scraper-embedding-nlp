@@ -59,3 +59,11 @@ def parse_single_post(html):
     if submission_text:
         return submission_text.get_text("\n", strip=True)
     return ""
+
+def parse_top_comment(html):
+    """Parses a specific post page to get the top visible comment text."""
+    soup = BeautifulSoup(html, "lxml")
+    comment = soup.select_one("div.comment div.md")
+    if comment:
+        return comment.get_text("\n", strip=True)
+    return ""
