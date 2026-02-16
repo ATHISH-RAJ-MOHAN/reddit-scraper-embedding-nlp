@@ -1,93 +1,143 @@
 # Reddit Scraper + NLP Pipeline
 
-This project scrapes Reddit posts, preprocesses text, generates embeddings, and extracts TF‑IDF keywords to build a structured dataset for downstream NLP tasks.
+This project implements a complete end-to-end NLP pipeline that:
+
+- Scrapes Reddit (HTML-based, no API key required)
+- Cleans and preprocesses text
+- Generates sentence embeddings
+- Extracts TF-IDF keywords
+- Clusters posts into meaningful topics
+- Automates the entire workflow
+
+All scraping is performed using the Old Reddit HTML interface.
 
 ---
-## Installations
+
+## Project Overview
+
+The system consists of the following stages:
+
+### 1 Scraping (HTML-Based)
+- Subreddits: Cooking, Recipes, AskCulinary, Baking, FoodScience
+- Two-phase scraping:
+  - Phase 1: Extract listing metadata (title, author, timestamp, permalink)
+  - Phase 2: Visit each permalink to extract full post body and top comment
+- Handles pagination, rate limiting, retries, and session persistence
+- Saves raw data to:
+  
+  `data/parsed_json/`
+
+---
+
+### 2 Preprocessing
+- Removes URLs, HTML tags, punctuation, numbers
+- Converts text to lowercase
+- Removes stopwords
+- Lemmatizes words
+- Combines title + body + comment into `full_text`
+- Masks authors (e.g., author_1)
+- Saves cleaned CSV files to:
+  
+  `data/cleaned_csv/`
+
+---
+
+### 3 Embedding Generation
+- Model: all-MiniLM-L6-v2 (SentenceTransformers)
+- Generates dense vector embeddings
+- Stores embeddings as JSON lists inside CSV
+- Output:
+  
+  `data/embedding_data/embeddings.csv`
+
+---
+
+### 4 TF-IDF Keyword Extraction
+- Extracts top-k keywords per post (default: 5)
+- Output:
+  
+  `data/embedding_data/embeddings_with_keywords.csv`
+
+---
+
+### 5 Clustering
+- Algorithm: K-Means (default k=8)
+- Identifies cluster keywords
+- Finds representative posts
+- Generates PCA visualization
+
+Outputs:
+- `data/clustered/clustered_messages.csv`
+- `data/clustered/cluster_summary.json`
+- `data/clustered/cluster_plot.png`
+
+---
+
+### 6 Automation
+Runs scraping → preprocessing → embedding → clustering on a scheduled loop.
+
+Script:
+`src/automation/run_pipeline.py`
+
+---
+
+## Project Structure
+
 ```
-pip install -r requirements.txt
-```
-
-## Data Collection
-
-The scraper collects posts from the Cooking, Recipes, AskCulinary, Baking, and FoodScience subreddits using the old Reddit HTML interface (no API key required). For each post, it retrieves the title, author, timestamp, permalink, self‑text, and the top comment. Pagination is handled automatically to fetch up to the requested number of posts (e.g., 1000). The raw output is saved as JSON files in data/parsed_json/.
-
-
-## Preprocessing Pipeline
-
-`preprocess.py` loads raw JSON files, cleans text, masks authors, and saves cleaned CSVs into `data/cleaned_csv/`.
-
-
-```bash
-cd src/Preprocessing-Embedding
-python preprocessing_pipeline.py
-
-
-## Run the full pipeline:
 project_root/
 ├── data/
 │   ├── cleaned_csv/
-│   │   ├── AskCulinary_cleaned.csv
-│   │   ├── Baking_cleaned.csv
-│   │   ├── Cooking_cleaned.csv
-│   │   ├── FoodScience_cleaned.csv
-│   │   └── Recipes_cleaned.csv
 │   ├── clustered/
-│   │   ├── cluster_plot.png
-│   │   ├── cluster_summary.json
-│   │   └── clustered_messages.csv
 │   ├── cooking_data/
-│   │   └── cooking.csv
 │   ├── embedding_data/
-│   │   └── embeddings.csv
 │   └── parsed_json/
-│       ├── AskCulinary.json
-│       ├── Baking.json
-│       ├── Cooking.json
-│       ├── FoodScience.json
-│       └── Recipes.json
 ├── src/
 │   ├── analysis/
-│   │   ├── __init__.py
-│   │   └── cluster_messages.py
 │   ├── automation/
-│   │   ├── __init__.py
-│   │   └── run_pipeline.py
 │   ├── config/
-│   │   └── headers.py
 │   ├── Preprocessing-Embedding/
-│   │   ├── embed.py
-│   │   ├── extract_keywords.py
-│   │   ├── preprocess.py
-│   │   └── preprocessing_pipeline.py
 │   └── scraper/
-│       ├── fetch_html.py
-│       ├── parse_posts.py
-│       ├── scrape_reddit.py
-│       └── test_scraper.py
-├── readme.md
+├── README.md
 └── requirements.txt
 ```
-## Final Dataset:
-data/cooking_data/cooking.csv
 
 ---
 
-Example:
+## How to Run the Full Pipeline
+
+### 1 Install Dependencies
 ```bash
-python src/scraper/scrape_reddit.py --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes --limit 100
+pip install -r requirements.txt
 ```
 
-**Preprocessing updates**
-- Merges `top_comment` and any `comments` list into a single cleaned field.
-- Auto‑discovers all JSON files in `data/parsed_json/`.
-- Writes `comments_clean` alongside `full_text`.
+### 2 Run the Scraper
+```bash
+python src/scraper/scrape_reddit.py \
+  --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes \
+  --limit 100
+```
+Raw JSON output: `data/parsed_json/`
 
-**Embedding updates**
-- Auto‑discovers all cleaned CSVs in `data/cleaned_csv/`.
-- Ensures embedding output directories exist.
+### 3 Run Preprocessing
+```bash
+cd src/Preprocessing-Embedding
+python preprocessing_pipeline.py
+```
+Output: `data/cleaned_csv/`
 
-**Clustering**
+### 4 Generate Embeddings
+```bash
+python src/Preprocessing-Embedding/embed.py
+```
+Output: `data/embedding_data/embeddings.csv`
+
+### 5 Extract TF-IDF Keywords
+```bash
+python src/Preprocessing-Embedding/extract_keywords.py
+```
+Output: `data/embedding_data/embeddings_with_keywords.csv`
+
+### 6 Run Clustering
 ```bash
 python src/analysis/cluster_messages.py --k 8
 ```
@@ -96,7 +146,25 @@ Outputs:
 - `data/clustered/cluster_summary.json`
 - `data/clustered/cluster_plot.png`
 
-**Automation**
+### 7 Run the Automated Pipeline
 ```bash
-python src/automation/run_pipeline.py 5 --limit 100 --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes --k 8
+python src/automation/run_pipeline.py 5 \
+  --limit 100 \
+  --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes \
+  --k 8
 ```
+
+---
+
+## Final Combined Dataset
+`data/cooking_data/cooking.csv`
+
+---
+
+## Team Members
+- Neil Bai  
+- Aadarsh Sudhir Ghiya  
+- Athish Raj Mohan  
+
+---
+
