@@ -6,7 +6,6 @@ from config.headers import get_headers
 REQUEST_COUNT = 0
 MAX_REQUESTS = 500
 
-# Create a session to persist cookies (Crucial for Reddit)
 session = requests.Session()
 session.headers.update(get_headers())
 
@@ -20,12 +19,11 @@ def fetch_html(url):
 
     for attempt in range(5):
         try:
-            # Use the session instead of requests.get
             response = session.get(url, timeout=10)
 
             if response.status_code == 200:
                 REQUEST_COUNT += 1
-                time.sleep(random.uniform(2, 4)) # Slightly increased delay to be safer
+                time.sleep(random.uniform(2, 4)) 
                 return response.text
 
             elif response.status_code == 429:
