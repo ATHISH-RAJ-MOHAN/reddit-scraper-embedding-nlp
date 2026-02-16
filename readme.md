@@ -74,7 +74,7 @@ Outputs:
 ---
 
 ### 6 Automation
-Runs scraping → preprocessing → embedding → clustering on a scheduled loop.
+Runs scraping --> preprocessing --> embedding --> clustering on a scheduled loop.
 
 Script:
 `src/automation/run_pipeline.py`
