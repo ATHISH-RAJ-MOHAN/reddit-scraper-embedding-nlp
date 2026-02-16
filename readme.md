@@ -53,11 +53,6 @@ data/cleaned_csv/
 data/cooking_data/cooking.csv
 
 ---
-## Added: Clustering + Automation
-
-**Scraper updates**
-- Added CLI arguments `--subreddits` and `--limit`.
-- Captures `top_comment` from each post detail page when available.
 
 Example:
 ```bash
@@ -86,6 +81,3 @@ Outputs:
 ```bash
 python src/automation/run_pipeline.py 5 --limit 100 --subreddits Cooking,Baking,AskCulinary,FoodScience,Recipes --k 8
 ```
-
-**Notes**
-- The first preprocessing run will download NLTK resources (`stopwords`, `wordnet`).
