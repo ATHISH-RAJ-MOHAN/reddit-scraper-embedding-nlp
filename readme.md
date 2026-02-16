@@ -29,9 +29,9 @@ project_root/
 │   │   ├── FoodScience.json
 │   │   └── Recipes.json
 │   │
-│   ├── cleaned_csv/          ← output of preprocess.py
-│   ├── embedding_data/       ← output of embed.py
-│   └── cooking_data/         ← output of extract_keywords.py
+│   ├── cleaned_csv/          <-- output of preprocess.py
+│   ├── embedding_data/       <-- output of embed.py
+│   └── cooking_data/         <-- output of extract_keywords.py
 │
 └── src/
     └── Preprocessing-Embedding/
